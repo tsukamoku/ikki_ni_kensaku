@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>複数行入力フォーム</title>
+<style>
+    textarea {
+        width: 300px;
+        height: 200px;
+    }
+</style>
+</head>
+<body>
+
+<h2>複数行入力フォーム</h2>
+
+<textarea id="inputText" placeholder="ここに複数行のテキストを入力してください"></textarea>
+<button id="executeButton">実行</button>
+
+<script>
+    // 実行ボタンにクリックイベントを追加する
+    document.getElementById('executeButton').addEventListener('click', function() {
+        // テキストエリアから入力されたテキストを取得
+        var inputText = document.getElementById("inputText").value;
+        
+        // 入力されたテキストを改行で分割し、各行を処理する
+        var lines = inputText.split('\n');
+        lines.forEach(function(line) {
+            // 空白を除外してURLエンコード
+            var searchTerm = encodeURIComponent(line.trim());
+            // Google検索のURLを作成
+            var searchUrl = 'https://www.google.co.jp/search?q=' + searchTerm;
+            // 新しいタブでGoogle検索を開く
+            window.open(searchUrl, '_blank');
+        });
+    });
+</script>
+
+</body>
+</html>
