@@ -1,0 +1,27 @@
+textarea {
+    width: 100%;
+    max-width: 600px;
+    height: 200px;
+}
+
+@media (max-width: 600px) {
+    textarea {
+        width: 90%;
+    }
+}
+
+button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+}
+
+.line-count {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    color: black; /* デフォルトの文字色 */
+}
+
+.line-count.red {
+    color: red; /* 行数が制限を超える場合、赤文字に変更 */
+}
