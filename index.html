@@ -6,8 +6,27 @@
 <title>一気に検索</title>
 <style>
     textarea {
-        width: 300px;
+        width: 100%;
+        max-width: 600px;
         height: 200px;
+    }
+    @media (max-width: 600px) {
+        textarea {
+            width: 90%;
+        }
+    }
+    button {
+        margin-top: 10px;
+        padding: 10px 20px;
+        font-size: 16px;
+    }
+    .line-count {
+        margin-top: 5px;
+        margin-bottom: 5px;
+        color: black; /* デフォルトの文字色 */
+    }
+    .line-count.red {
+        color: red; /* 行数が50を超えると赤文字に変更 */
     }
 </style>
 </head>
@@ -15,25 +34,85 @@
 
 <h2>一気に検索</h2>
 
-<textarea id="inputText" placeholder="ここに複数行のテキストを入力してください"></textarea>
+<div>
+    <textarea id="inputText" placeholder="ここに複数行のテキストを入力してください"></textarea>
+    <div id="lineCount" class="line-count">行数: 0</div>
+</div>
+
+<div>
+    <input type="radio" id="normalSearch" name="searchType" value="normal" checked>
+    <label for="normalSearch">通常の検索</label>
+    <input type="radio" id="imageSearch" name="searchType" value="image">
+    <label for="imageSearch">画像検索</label>
+</div>
+
 <button id="executeButton">実行</button>
 
 <script>
-    // 実行ボタンにクリックイベントを追加する
-    document.getElementById('executeButton').addEventListener('click', function() {
-        // テキストエリアから入力されたテキストを取得
-        var inputText = document.getElementById("inputText").value;
+    const inputText = document.getElementById("inputText");
+    const lineCount = document.getElementById("lineCount");
+    const executeButton = document.getElementById('executeButton');
+
+    inputText.addEventListener("input", updateLineCount);
+
+    function updateLineCount() {
+        const text = inputText.value;
+        const nonEmptyLines = text.split('\n').filter(line => line.trim() !== '');
+        const count = nonEmptyLines.length;
+        lineCount.textContent = "行数: " + count;
+        if (count > 50) {
+            lineCount.classList.add('red'); // 行数が50を超える場合、赤文字に変更
+        } else {
+            lineCount.classList.remove('red'); // 50を超えない場合、赤文字スタイルを解除
+        }
+    }
+
+    executeButton.addEventListener('click', function() {
+        const inputTextValue = inputText.value.trim();
         
-        // 入力されたテキストを改行で分割し、各行を処理する
-        var lines = inputText.split('\n');
-        lines.forEach(function(line) {
-            // 空白を除外してURLエンコード
-            var searchTerm = encodeURIComponent(line.trim());
-            // Google検索のURLを作成
-            var searchUrl = 'https://www.google.co.jp/search?q=' + searchTerm;
-            // 新しいタブでGoogle検索を開く
-            window.open(searchUrl, '_blank');
-        });
+        if (!inputTextValue) {
+            alert("テキストを入力してください。");
+            return;
+        }
+
+        const searchType = document.querySelector('input[name="searchType"]:checked').value;
+        const lines = inputTextValue.split('\n').filter(line => line.trim() !== '');
+
+        if (lines.length === 0) {
+            alert("有効なテキストを入力してください。");
+            return;
+        }
+
+        if (lines.length > 50) {
+            const confirmation = confirm("行数が50を超えています。続行しますか？");
+            if (!confirmation) {
+                return;
+            }
+        }
+
+        const processBatch = (batch, index) => {
+            batch.forEach(function(line) {
+                const searchTerm = encodeURIComponent(line.trim());
+                if (searchTerm) {
+                    let searchUrl = '';
+                    if (searchType === 'normal') {
+                        searchUrl = 'https://www.google.co.jp/search?q=' + searchTerm;
+                    } else if (searchType === 'image') {
+                        searchUrl = 'https://www.google.co.jp/search?tbm=isch&q=' + searchTerm;
+                    }
+                    window.open(searchUrl, '_blank');
+                }
+            });
+
+            if ((index + 1) * 5 < lines.length) {
+                const randomDelay = Math.floor(Math.random() * 2000) + 1000;
+                setTimeout(() => {
+                    processBatch(lines.slice((index + 1) * 5, (index + 2) * 5), index + 1);
+                }, randomDelay);
+            }
+        };
+
+        processBatch(lines.slice(0, 5), 0);
     });
 </script>
 
